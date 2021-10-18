@@ -34,3 +34,13 @@ func (c *Clients) DeleteService(service *corev1.Service, ops metav1.DeleteOption
 	logger.Info("Delete Service %q \n", service.GetObjectMeta().GetName())
 	return err
 }
+
+func (c *Clients) GetService(ser *corev1.Service, ops metav1.GetOptions) *corev1.Service {
+	serviceClient := c.KubeClient.CoreV1().Services(ser.Namespace)
+	reser, err := serviceClient.Get(ctx, ser.Name, ops)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	logger.Info("Get service %q \n", ser.GetObjectMeta().GetName())
+	return reser
+}

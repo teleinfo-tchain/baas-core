@@ -52,6 +52,14 @@ type FabricChannel struct {
 	Args           [][]byte `json:"args"`
 }
 
+type DeleteNode struct {
+	ChainId     int      `json:"ChainId"`     //用户帐号
+	LeagueId    int      `json:"LeagueId"`     //用户帐号
+	Type        string   `json:"Type"`  //只能为orderer或者peer
+	Index       int      `json:"Index"`
+	Org         string   `json:"org"`
+}
+
 func (f FabricChannel) GetChain() *FabricChain {
 	return &f.FabricChain
 }
