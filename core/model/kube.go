@@ -21,7 +21,11 @@ type ChainPod struct {
 }
 
 type Resources struct {
-	Node   string  `json:"node"`
+	ChainId  int    `json:"chain_id"`
+	LeagueId int   `json:"league_id"`
+	Type     string `json:"type"`
+	Index    int    `json:"index"`
+	Org      string `json:"org"`
 	CPU    float64 `json:"cpu"`
 	Memory int     `json:"memory"`
 }
