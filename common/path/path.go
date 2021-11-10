@@ -32,7 +32,7 @@ type ProjectDir struct {
 	BaasFabricDataDir      string
 }
 
-func (p ProjectDir) GetProjectDir(chain *model.FabricChain, Config *viper.Viper) UserChainPath {
+func (p ProjectDir)  GetProjectDir(chain *model.FabricChain, Config *viper.Viper) UserChainPath {
 	artifactPath := filepath.Join(p.BaasArtifactsDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
 	// /baas-fabricEngine/baas-nfsshared/baas-k8s-config/[leagueid]/[chainid]/
 	k8sConfig := filepath.Join(p.BaasK8sFabricConfigDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
@@ -43,6 +43,7 @@ func (p ProjectDir) GetProjectDir(chain *model.FabricChain, Config *viper.Viper)
 	templatePath := filepath.Join(Config.GetString("BaasRootPath"), Config.GetString("BaasTemplate"))
 	return NewUserChainPath(artifactPath, k8sConfig, dataPath, templatePath)
 }
+
 
 func (p ProjectDir) BuildProjectDir(chain *model.FabricChain,Config *viper.Viper) UserChainPath {
 	//nfs shared
@@ -91,7 +92,7 @@ func (p ProjectDir) BuildProjectDir(chain *model.FabricChain,Config *viper.Viper
 
 	for _, o := range chain.PeersOrgs {
 		//改了
-		for i := 0; i < chain.Peerconfig[o].Peercount; i++ {
+		for i := 0; i < chain.PeerOrgConfig[o].Peercount; i++ {
 			//baas-fabricEngine/baas-nfsshared/baas-fabric-data/[leagueid]/[chainid]/peer[i].[Leagueid].[chainid][org]
 			domain := "peer" + strconv.Itoa(i) + "." + chain.GetHostDomain(o)
 			fileutil.CreatedDir(filepath.Join(dataPath, domain))
