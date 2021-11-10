@@ -17,13 +17,14 @@ func (c *Clients) GetServiceList(ns string, ops metav1.ListOptions) *corev1.Serv
 	return services
 }
 
-func (c *Clients) CreateService(service *corev1.Service, opts metav1.CreateOptions) *corev1.Service {
+func (c *Clients) CreateService(service *corev1.Service, opts metav1.CreateOptions) (*corev1.Service, error) {
 	newservice, err := c.KubeClient.CoreV1().Services(service.Namespace).Create(ctx, service, opts)
 	if err != nil {
 		logger.Error(err.Error())
+		return nil, err
 	}
 	logger.Info("Created Service %q \n", newservice.GetObjectMeta().GetName())
-	return newservice
+	return newservice, nil
 }
 
 func (c *Clients) DeleteService(service *corev1.Service, ops metav1.DeleteOptions) error {
