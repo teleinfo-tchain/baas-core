@@ -6,7 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (c *Clients) CreateStatefulSet(sfs *appsv1.StatefulSet, opts metav1.CreateOptions) *appsv1.StatefulSet {
+func (c *Clients) CreateStatefulSet(sfs *appsv1.StatefulSet, opts metav1.CreateOptions) (*appsv1.StatefulSet, error) {
 	if sfs.Namespace == "" {
 		sfs.Namespace = corev1.NamespaceDefault
 	}
@@ -14,9 +14,10 @@ func (c *Clients) CreateStatefulSet(sfs *appsv1.StatefulSet, opts metav1.CreateO
 	newSfs, err := sfsClient.Create(ctx, sfs, opts)
 	if err != nil {
 		logger.Error(err.Error())
+		return nil, err
 	}
 	logger.Info("Created deployment %q \n", newSfs.GetObjectMeta().GetName())
-	return newSfs
+	return newSfs, nil
 }
 
 func (c *Clients) DeleteStatefulSet(sfs *appsv1.StatefulSet, ops metav1.DeleteOptions) error {

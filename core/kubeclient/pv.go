@@ -5,14 +5,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (c *Clients) CreatePersistentVolume(pv *corev1.PersistentVolume, opts metav1.CreateOptions) *corev1.PersistentVolume {
+func (c *Clients) CreatePersistentVolume(pv *corev1.PersistentVolume, opts metav1.CreateOptions) (*corev1.PersistentVolume, error) {
 
 	newpv, err := c.KubeClient.CoreV1().PersistentVolumes().Create(ctx, pv, opts)
 	if err != nil {
 		logger.Error(err.Error())
+		return nil, err
 	}
 	logger.Info("Created PersistentVolume %q \n", newpv.GetObjectMeta().GetName())
-	return newpv
+	return newpv, nil
 }
 
 func (c *Clients) DeletePersistentVolume(pv *corev1.PersistentVolume, ops metav1.DeleteOptions) error {

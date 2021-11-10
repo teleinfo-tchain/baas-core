@@ -11,7 +11,7 @@ import (
 // TODO 上下文判断需要明确
 var ctx = context.TODO()
 
-func (c *Clients) CreateDeployment(dep *appsv1.Deployment, opts metav1.CreateOptions) *appsv1.Deployment {
+func (c *Clients) CreateDeployment(dep *appsv1.Deployment, opts metav1.CreateOptions) (*appsv1.Deployment, error) {
 	if dep.Namespace == "" {
 		dep.Namespace = corev1.NamespaceDefault
 	}
@@ -19,9 +19,10 @@ func (c *Clients) CreateDeployment(dep *appsv1.Deployment, opts metav1.CreateOpt
 	newDep, err := deploymentsClient.Create(ctx, dep, opts)
 	if err != nil {
 		logger.Error(err.Error())
+		return nil, err
 	}
 	logger.Info("Created deployment %q \n", newDep.GetObjectMeta().GetName())
-	return newDep
+	return newDep, nil
 }
 
 func (c *Clients) GetDeployment(dep *appsv1.Deployment, ops metav1.GetOptions) *appsv1.Deployment {
@@ -56,7 +57,7 @@ func (c *Clients) DeleteDeployment(dep *appsv1.Deployment, ops metav1.DeleteOpti
 	return err
 }
 
-func (c *Clients) UpdateDeployment(dep *appsv1.Deployment, opts metav1.UpdateOptions) *appsv1.Deployment {
+func (c *Clients) UpdateDeployment(dep *appsv1.Deployment, opts metav1.UpdateOptions) (*appsv1.Deployment, error) {
 	deploymentsClient := c.KubeClient.AppsV1().Deployments(dep.Namespace)
 
 	newDep, err := deploymentsClient.Update(ctx, dep, opts)
@@ -65,5 +66,5 @@ func (c *Clients) UpdateDeployment(dep *appsv1.Deployment, opts metav1.UpdateOpt
 	}
 
 	logger.Info("Updated deployment %q \n", newDep.GetObjectMeta().GetName())
-	return newDep
+	return newDep, err
 }
