@@ -215,14 +215,20 @@ func NewCryptogen(config, dir string) *Cryptogen {
 	}
 }
 
-func (c *Cryptogen) Exec(command string) {
+func (c *Cryptogen) Exec(command string) error{
 	switch command {
 	// "generate" command
 	case "generate":
-		c.generate()
+		err := c.generate()
+		if err != nil{
+			return err
+		}
 		// "extend" command
 	case "extend":
-		c.extend()
+		err := c.extend()
+		if err != nil{
+			return err
+		}
 		// "showtemplate" command
 	case "showtemplate":
 		fmt.Print(defaultConfig)
@@ -231,6 +237,7 @@ func (c *Cryptogen) Exec(command string) {
 	case "version":
 		c.printVersion()
 	}
+	return nil
 
 }
 
@@ -264,39 +271,51 @@ func (c *Cryptogen) getConfig() (*Config, error) {
 	return config, nil
 }
 
-func (c *Cryptogen) extend() {
+func (c *Cryptogen) extend() error{
 	config, err := c.getConfig()
 	if err != nil {
 		fmt.Printf("Error reading kubeconfig: %s", err)
-		os.Exit(-1)
+		return err
+		//os.Exit(-1)
 	}
 
 	for _, orgSpec := range config.PeerOrgs {
 		err = c.renderOrgSpec(&orgSpec, "peer")
 		if err != nil {
 			fmt.Printf("Error processing peer configuration: %s", err)
-			os.Exit(-1)
+			return err
+			//os.Exit(-1)
 		}
-		c.extendPeerOrg(orgSpec)
+		err = c.extendPeerOrg(orgSpec)
+		if err != nil{
+			return err
+		}
 	}
 
 	for _, orgSpec := range config.OrdererOrgs {
 		err = c.renderOrgSpec(&orgSpec, "orderer")
 		if err != nil {
 			fmt.Printf("Error processing orderer configuration: %s", err)
-			os.Exit(-1)
+			return err
+			//os.Exit(-1)
 		}
-		c.extendOrdererOrg(orgSpec)
+		err = c.extendOrdererOrg(orgSpec)
+		if err != nil{
+			return err
+		}
 	}
+	return  nil
 
 }
 
-func (c *Cryptogen) extendPeerOrg(orgSpec OrgSpec) {
+func (c *Cryptogen) extendPeerOrg(orgSpec OrgSpec) error{
 	orgName := orgSpec.Domain
 	orgDir := filepath.Join(c.inputDir, "peerOrganizations", orgName)
 	if _, err := os.Stat(orgDir); os.IsNotExist(err) {
-		c.generatePeerOrg(c.inputDir, orgSpec)
-		return
+		err := c.generatePeerOrg(c.inputDir, orgSpec)
+		if err != nil{
+			return err
+		}
 	}
 
 	peersDir := filepath.Join(orgDir, "peers")
@@ -319,7 +338,8 @@ func (c *Cryptogen) extendPeerOrg(orgSpec OrgSpec) {
 		if err != nil {
 			fmt.Printf("Error copying admin cert for org %s peer %s:\n%v\n",
 				orgName, spec.CommonName, err)
-			os.Exit(1)
+			return err
+			//os.Exit(1)
 		}
 	}
 
@@ -333,10 +353,14 @@ func (c *Cryptogen) extendPeerOrg(orgSpec OrgSpec) {
 		users = append(users, user)
 	}
 
-	c.generateNodes(usersDir, users, signCA, tlsCA, msp.CLIENT, orgSpec.EnableNodeOUs)
+	err := c.generateNodes(usersDir, users, signCA, tlsCA, msp.CLIENT, orgSpec.EnableNodeOUs)
+	if err != nil{
+		return err
+	}
+	return nil
 }
 
-func (c *Cryptogen) extendOrdererOrg(orgSpec OrgSpec) {
+func (c *Cryptogen) extendOrdererOrg(orgSpec OrgSpec) error{
 	orgName := orgSpec.Domain
 
 	orgDir := filepath.Join(c.inputDir, "ordererOrganizations", orgName)
@@ -345,14 +369,19 @@ func (c *Cryptogen) extendOrdererOrg(orgSpec OrgSpec) {
 	tlscaDir := filepath.Join(orgDir, "tlsca")
 	orderersDir := filepath.Join(orgDir, "orderers")
 	if _, err := os.Stat(orgDir); os.IsNotExist(err) {
-		c.generateOrdererOrg(c.inputDir, orgSpec)
-		return
+		err := c.generateOrdererOrg(c.inputDir, orgSpec)
+		if err != nil{
+			return err
+		}
 	}
 
 	signCA := c.getCA(caDir, orgSpec, orgSpec.CA.CommonName)
 	tlsCA := c.getCA(tlscaDir, orgSpec, "tls"+orgSpec.CA.CommonName)
 
-	c.generateNodes(orderersDir, orgSpec.Specs, signCA, tlsCA, msp.ORDERER, false)
+	err := c.generateNodes(orderersDir, orgSpec.Specs, signCA, tlsCA, msp.ORDERER, false)
+	if err != nil{
+		return err
+	}
 
 	adminUser := NodeSpec{
 		CommonName: fmt.Sprintf("%s@%s", adminBaseName, orgName),
@@ -364,24 +393,28 @@ func (c *Cryptogen) extendOrdererOrg(orgSpec OrgSpec) {
 		if err != nil {
 			fmt.Printf("Error copying admin cert for org %s orderer %s:\n%v\n",
 				orgName, spec.CommonName, err)
-			os.Exit(1)
+			return err
+			//os.Exit(1)
 		}
 	}
+	return nil
 }
 
-func (c *Cryptogen) generate() {
+func (c *Cryptogen) generate() error{
 
 	config, err := c.getConfig()
 	if err != nil {
 		fmt.Printf("Error reading kubeconfig: %s", err)
-		os.Exit(-1)
+		//os.Exit(-1)
+		return err
 	}
 
 	for _, orgSpec := range config.PeerOrgs {
 		err = c.renderOrgSpec(&orgSpec, "peer")
 		if err != nil {
 			fmt.Printf("Error processing peer configuration: %s", err)
-			os.Exit(-1)
+			return err
+			//os.Exit(-1)
 		}
 		c.generatePeerOrg(c.outputDir, orgSpec)
 	}
@@ -390,10 +423,15 @@ func (c *Cryptogen) generate() {
 		err = c.renderOrgSpec(&orgSpec, "orderer")
 		if err != nil {
 			fmt.Printf("Error processing orderer configuration: %s", err)
-			os.Exit(-1)
+			return err
+			//os.Exit(-1)
 		}
-		c.generateOrdererOrg(c.outputDir, orgSpec)
+		err = c.generateOrdererOrg(c.outputDir, orgSpec)
+		if err != nil{
+			return err
+		}
 	}
+	return nil
 }
 
 func (c *Cryptogen) parseTemplate(input string, data interface{}) (string, error) {
@@ -461,7 +499,7 @@ func (c *Cryptogen) renderOrgSpec(orgSpec *OrgSpec, prefix string) error {
 	for i := 0; i < orgSpec.Template.Count; i++ {
 		data := HostnameData{
 			Prefix: prefix,
-			Index:  i + orgSpec.Template.Start,
+			Index:  i  + orgSpec.Template.Start,
 			Domain: orgSpec.Domain,
 		}
 
@@ -499,7 +537,7 @@ func (c *Cryptogen) renderOrgSpec(orgSpec *OrgSpec, prefix string) error {
 	return nil
 }
 
-func (c *Cryptogen) generatePeerOrg(baseDir string, orgSpec OrgSpec) {
+func (c *Cryptogen) generatePeerOrg(baseDir string, orgSpec OrgSpec) error{
 
 	orgName := orgSpec.Domain
 
@@ -516,22 +554,28 @@ func (c *Cryptogen) generatePeerOrg(baseDir string, orgSpec OrgSpec) {
 	signCA, err := ca.NewCA(caDir, orgName, orgSpec.CA.CommonName, orgSpec.CA.Country, orgSpec.CA.Province, orgSpec.CA.Locality, orgSpec.CA.OrganizationalUnit, orgSpec.CA.StreetAddress, orgSpec.CA.PostalCode)
 	if err != nil {
 		fmt.Printf("Error generating signCA for org %s:\n%v\n", orgName, err)
-		os.Exit(1)
+		return err
+		//os.Exit(1)
 	}
 	// generate TLS CA
 	tlsCA, err := ca.NewCA(tlsCADir, orgName, "tls"+orgSpec.CA.CommonName, orgSpec.CA.Country, orgSpec.CA.Province, orgSpec.CA.Locality, orgSpec.CA.OrganizationalUnit, orgSpec.CA.StreetAddress, orgSpec.CA.PostalCode)
 	if err != nil {
 		fmt.Printf("Error generating tlsCA for org %s:\n%v\n", orgName, err)
-		os.Exit(1)
+		return err
+		//os.Exit(1)
 	}
 
 	err = msp.GenerateVerifyingMSP(mspDir, signCA, tlsCA, orgSpec.EnableNodeOUs)
 	if err != nil {
 		fmt.Printf("Error generating MSP for org %s:\n%v\n", orgName, err)
-		os.Exit(1)
+		return err
+		//os.Exit(1)
 	}
 
-	c.generateNodes(peersDir, orgSpec.Specs, signCA, tlsCA, msp.PEER, orgSpec.EnableNodeOUs)
+	err = c.generateNodes(peersDir, orgSpec.Specs, signCA, tlsCA, msp.PEER, orgSpec.EnableNodeOUs)
+	if err != nil{
+		return err
+	}
 
 	// TODO: add ability to specify usernames
 	users := []NodeSpec{}
@@ -548,14 +592,18 @@ func (c *Cryptogen) generatePeerOrg(baseDir string, orgSpec OrgSpec) {
 	}
 
 	users = append(users, adminUser)
-	c.generateNodes(usersDir, users, signCA, tlsCA, msp.CLIENT, orgSpec.EnableNodeOUs)
+	err = c.generateNodes(usersDir, users, signCA, tlsCA, msp.CLIENT, orgSpec.EnableNodeOUs)
+	if err != nil{
+		return err
+	}
 
 	// copy the admin cert to the org's MSP admincerts
 	err = c.copyAdminCert(usersDir, adminCertsDir, adminUser.CommonName)
 	if err != nil {
 		fmt.Printf("Error copying admin cert for org %s:\n%v\n",
 			orgName, err)
-		os.Exit(1)
+		return err
+		//os.Exit(1)
 	}
 
 	// copy the admin cert to each of the org's peer's MSP admincerts
@@ -565,9 +613,11 @@ func (c *Cryptogen) generatePeerOrg(baseDir string, orgSpec OrgSpec) {
 		if err != nil {
 			fmt.Printf("Error copying admin cert for org %s peer %s:\n%v\n",
 				orgName, spec.CommonName, err)
-			os.Exit(1)
+			return err
+			//os.Exit(1)
 		}
 	}
+	return nil
 }
 
 func (c *Cryptogen) copyAdminCert(usersDir, adminCertsDir, adminUserName string) error {
@@ -595,7 +645,7 @@ func (c *Cryptogen) copyAdminCert(usersDir, adminCertsDir, adminUserName string)
 
 }
 
-func (c *Cryptogen) generateNodes(baseDir string, nodes []NodeSpec, signCA *ca.CA, tlsCA *ca.CA, nodeType int, nodeOUs bool) {
+func (c *Cryptogen) generateNodes(baseDir string, nodes []NodeSpec, signCA *ca.CA, tlsCA *ca.CA, nodeType int, nodeOUs bool) error{
 
 	for _, node := range nodes {
 		nodeDir := filepath.Join(baseDir, node.CommonName)
@@ -603,13 +653,15 @@ func (c *Cryptogen) generateNodes(baseDir string, nodes []NodeSpec, signCA *ca.C
 			err := msp.GenerateLocalMSP(nodeDir, node.CommonName, node.SANS, signCA, tlsCA, nodeType, nodeOUs)
 			if err != nil {
 				fmt.Printf("Error generating local MSP for %s:\n%v\n", node, err)
-				os.Exit(1)
+				return err
+				//os.Exit(1)
 			}
 		}
 	}
+	return nil
 }
 
-func (c *Cryptogen) generateOrdererOrg(baseDir string, orgSpec OrgSpec) {
+func (c *Cryptogen) generateOrdererOrg(baseDir string, orgSpec OrgSpec) error{
 
 	orgName := orgSpec.Domain
 
@@ -625,19 +677,22 @@ func (c *Cryptogen) generateOrdererOrg(baseDir string, orgSpec OrgSpec) {
 	signCA, err := ca.NewCA(caDir, orgName, orgSpec.CA.CommonName, orgSpec.CA.Country, orgSpec.CA.Province, orgSpec.CA.Locality, orgSpec.CA.OrganizationalUnit, orgSpec.CA.StreetAddress, orgSpec.CA.PostalCode)
 	if err != nil {
 		fmt.Printf("Error generating signCA for org %s:\n%v\n", orgName, err)
-		os.Exit(1)
+		return err
+		//os.Exit(1)
 	}
 	// generate TLS CA
 	tlsCA, err := ca.NewCA(tlsCADir, orgName, "tls"+orgSpec.CA.CommonName, orgSpec.CA.Country, orgSpec.CA.Province, orgSpec.CA.Locality, orgSpec.CA.OrganizationalUnit, orgSpec.CA.StreetAddress, orgSpec.CA.PostalCode)
 	if err != nil {
 		fmt.Printf("Error generating tlsCA for org %s:\n%v\n", orgName, err)
-		os.Exit(1)
+		return err
+		//os.Exit(1)
 	}
 
 	err = msp.GenerateVerifyingMSP(mspDir, signCA, tlsCA, false)
 	if err != nil {
 		fmt.Printf("Error generating MSP for org %s:\n%v\n", orgName, err)
-		os.Exit(1)
+		return err
+		//os.Exit(1)
 	}
 
 	c.generateNodes(orderersDir, orgSpec.Specs, signCA, tlsCA, msp.ORDERER, false)
@@ -657,7 +712,8 @@ func (c *Cryptogen) generateOrdererOrg(baseDir string, orgSpec OrgSpec) {
 	if err != nil {
 		fmt.Printf("Error copying admin cert for org %s:\n%v\n",
 			orgName, err)
-		os.Exit(1)
+		return err
+		//os.Exit(1)
 	}
 
 	// copy the admin cert to each of the org's orderers's MSP admincerts
@@ -667,10 +723,11 @@ func (c *Cryptogen) generateOrdererOrg(baseDir string, orgSpec OrgSpec) {
 		if err != nil {
 			fmt.Printf("Error copying admin cert for org %s orderer %s:\n%v\n",
 				orgName, spec.CommonName, err)
-			os.Exit(1)
+			return err
+			//os.Exit(1)
 		}
 	}
-
+	return nil
 }
 
 func (c *Cryptogen) copyFile(src, dst string) error {

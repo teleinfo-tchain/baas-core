@@ -16,21 +16,22 @@ func FirstUpper(org string) string {
 }
 
 //yaml to 字节数组
-func Yamls2Bytes(rootPath string, files []string) [][]byte {
+func Yamls2Bytes(rootPath string, files []string) ([][]byte, error) {
 	yamls := make([][]byte, len(files))
 	for i, name := range files {
 		yamlBytes, err := ioutil.ReadFile(filepath.Join(rootPath, name))
 		if err != nil {
 			log.Println(err.Error())
+			return nil, err
 		}
 		yamls[i] = yamlBytes
 
 	}
-	return yamls
+	return yamls, nil
 }
 
 //yaml to json
-func Yamls2Jsons(data [][]byte) [][]byte {
+func Yamls2Jsons(data [][]byte) ([][]byte, error) {
 	jsons := make([][]byte, 0)
 	for _, yamlBytes := range data {
 		yamls := bytes.Split(yamlBytes, []byte("---"))
@@ -41,10 +42,11 @@ func Yamls2Jsons(data [][]byte) [][]byte {
 			obj, err := yaml.ToJSON(v)
 			if err != nil {
 				log.Println(err.Error())
+				return nil, err
 			}
 			jsons = append(jsons, obj)
 		}
 
 	}
-	return jsons
+	return jsons, nil
 }

@@ -5,14 +5,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (c *Clients) GetNodeList(ops metav1.ListOptions) *corev1.NodeList {
+func (c *Clients) GetNodeList(ops metav1.ListOptions) (*corev1.NodeList,error) {
 
 	ns, err := c.KubeClient.CoreV1().Nodes().List(ctx, ops)
 	if err != nil {
 		logger.Error(err.Error())
+		return nil, err
 	}
 	for _, n := range ns.Items {
 		logger.Info("Node：", n.Name, n.Status.Addresses)
 	}
-	return ns
+	return ns,nil
 }

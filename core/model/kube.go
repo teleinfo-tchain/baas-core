@@ -24,7 +24,7 @@ type Resources struct {
 	ChainId  int    `json:"chain_id"`
 	LeagueId int   `json:"league_id"`
 	Type     string `json:"type"`
-	Index    int    `json:"index"`
+	Index    string    `json:"index"`
 	Org      string `json:"org"`
 	CPU    float64 `json:"cpu"`
 	Memory int     `json:"memory"`

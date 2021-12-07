@@ -266,7 +266,7 @@ func (c *Configtxgen) doPrintOrg(t *genesisconfig.TopLevel, printOrg string) err
 	return errors.Errorf("organization %s not found", printOrg)
 }
 
-func (c *Configtxgen) Exec() {
+func (c *Configtxgen) Exec() error{
 
 	if c.profile == "" {
 		c.profile = genesisconfig.SampleInsecureSoloProfile
@@ -298,6 +298,9 @@ func (c *Configtxgen) Exec() {
 				logger.Error(fmt.Sprint(err) + ". " +
 					"Please make sure that FABRIC_CFG_PATH or -configPath is set to a path " +
 					"which contains configtx.yaml with the specified profile")
+				err = errors.New(fmt.Sprint(err) + ". " +
+					"Please make sure that FABRIC_CFG_PATH or -configPath is set to a path " +
+					"which contains configtx.yaml with the specified profile")
 				os.Exit(1)
 			}
 			logger.Panic(err)
@@ -307,18 +310,31 @@ func (c *Configtxgen) Exec() {
 	logger.Info("Loading configuration")
 	factory.InitFactories(nil)
 	var profileConfig *genesisconfig.Profile
+	var err error
 	if c.outputBlock != "" || c.outputChannelCreateTx != "" || c.outputAnchorPeersUpdate != "" {
 		if c.configPath != "" {
-			profileConfig = genesisconfig.Load(c.profile, c.configPath)
+			profileConfig, err = genesisconfig.Load(c.profile, c.configPath)
+			if err != nil{
+				return err
+			}
 		} else {
-			profileConfig = genesisconfig.Load(c.profile)
+			profileConfig, err = genesisconfig.Load(c.profile)
+			if err != nil{
+				return err
+			}
 		}
 	}
 	var topLevelConfig *genesisconfig.TopLevel
 	if c.configPath != "" {
-		topLevelConfig = genesisconfig.LoadTopLevel(c.configPath)
+		topLevelConfig, err = genesisconfig.LoadTopLevel(c.configPath)
+		if err != nil{
+			return err
+		}
 	} else {
-		topLevelConfig = genesisconfig.LoadTopLevel()
+		topLevelConfig, err = genesisconfig.LoadTopLevel()
+		if err != nil{
+			return err
+		}
 	}
 
 	var baseProfile *genesisconfig.Profile
@@ -327,47 +343,67 @@ func (c *Configtxgen) Exec() {
 			logger.Warning("Specified 'channelCreateTxBaseProfile', but did not specify 'outputChannelCreateTx', 'channelCreateTxBaseProfile' will not affect output.")
 		}
 		if c.configPath != "" {
-			baseProfile = genesisconfig.Load(c.channelCreateTxBaseProfile, c.configPath)
+			baseProfile, err = genesisconfig.Load(c.channelCreateTxBaseProfile, c.configPath)
+			if err != nil{
+				return err
+			}
 		} else {
-			baseProfile = genesisconfig.Load(c.channelCreateTxBaseProfile)
+			baseProfile, err = genesisconfig.Load(c.channelCreateTxBaseProfile)
+			if err != nil{
+				return err
+			}
 		}
 	}
 
 	if c.outputBlock != "" {
 		if err := c.doOutputBlock(profileConfig, c.channelID, c.outputBlock); err != nil {
-			logger.Fatalf("Error on outputBlock: %s", err)
+			logger.Error("Error on outputBlock: %s", err)
+			err = errors.New("Error on outputBlock: " +  err.Error())
+			return err
 		}
 	}
 
 	if c.outputChannelCreateTx != "" {
 		if err := c.doOutputChannelCreateTx(profileConfig, baseProfile, c.channelID, c.outputChannelCreateTx); err != nil {
-			logger.Fatalf("Error on outputChannelCreateTx: %s", err)
+			logger.Error("Error on outputChannelCreateTx: %s", err)
+			err = errors.New("Error on outputChannelCreateTx: " +  err.Error())
+			return err
 		}
 	}
 
 	if c.inspectBlock != "" {
 		if err := c.doInspectBlock(c.inspectBlock); err != nil {
-			logger.Fatalf("Error on inspectBlock: %s", err)
+			logger.Error("Error on inspectBlock: %s", err)
+			err = errors.New("Error on inspectBlock: " +  err.Error())
+			return err
 		}
 	}
 
 	if c.inspectChannelCreateTx != "" {
 		if err := c.doInspectChannelCreateTx(c.inspectChannelCreateTx); err != nil {
-			logger.Fatalf("Error on inspectChannelCreateTx: %s", err)
+			logger.Error("Error on inspectChannelCreateTx: %s", err)
+			err = errors.New("Error on inspectChannelCreateTx: " +  err.Error())
+			return err
 		}
 	}
 
 	if c.outputAnchorPeersUpdate != "" {
 		if err := c.doOutputAnchorPeersUpdate(profileConfig, c.channelID, c.outputAnchorPeersUpdate, c.asOrg); err != nil {
-			logger.Fatalf("Error on inspectChannelCreateTx: %s", err)
+			logger.Error("Error on inspectChannelCreateTx: %s", err)
+			err = errors.New("Error on inspectChannelCreateTx: " +  err.Error())
+
+			return err
 		}
 	}
 
 	if c.printOrg != "" {
 		if err := c.doPrintOrg(topLevelConfig, c.printOrg); err != nil {
-			logger.Fatalf("Error on printOrg: %s", err)
+			logger.Error("Error on printOrg: %s", err)
+			err = errors.New("Error on printOrg: " +  err.Error())
+			return  err
 		}
 	}
+	return nil
 }
 
 func (c *Configtxgen) printVersion() {

@@ -25,14 +25,15 @@ func (c *Clients) CreateDeployment(dep *appsv1.Deployment, opts metav1.CreateOpt
 	return newDep, nil
 }
 
-func (c *Clients) GetDeployment(dep *appsv1.Deployment, ops metav1.GetOptions) *appsv1.Deployment {
+func (c *Clients) GetDeployment(dep *appsv1.Deployment, ops metav1.GetOptions) (*appsv1.Deployment, error) {
 	deploymentsClient := c.KubeClient.AppsV1().Deployments(dep.Namespace)
 	redep, err := deploymentsClient.Get(ctx, dep.Name, ops)
 	if err != nil {
 		logger.Error(err.Error())
+		return nil, err
 	}
 	logger.Info("Get deployment %q \n", dep.GetObjectMeta().GetName())
-	return redep
+	return redep, nil
 }
 
 func (c *Clients) GetDeploymentList(dep *appsv1.Deployment, ops metav1.ListOptions) *appsv1.DeploymentList {

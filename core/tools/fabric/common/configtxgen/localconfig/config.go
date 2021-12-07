@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"errors"
 
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/common/policies"
@@ -213,7 +214,7 @@ var genesisDefaults = TopLevel{
 //
 // Note, for environment overrides to work properly within a profile, Load
 // should be used instead.
-func LoadTopLevel(configPaths ...string) *TopLevel {
+func LoadTopLevel(configPaths ...string) (*TopLevel, error) {
 	config := viper.New()
 	if len(configPaths) > 0 {
 		for _, p := range configPaths {
@@ -233,27 +234,31 @@ func LoadTopLevel(configPaths ...string) *TopLevel {
 
 	err := config.ReadInConfig()
 	if err != nil {
-		logger.Panic("Error reading configuration: ", err)
+		err = errors.New("Error reading configuration: " + err.Error())
+		//logger.Panic("Error reading configuration: ", err)
+		return nil, err
 	}
 	logger.Debugf("Using config file: %s", config.ConfigFileUsed())
 
 	var uconf TopLevel
 	err = viperutil.EnhancedExactUnmarshal(config, &uconf)
 	if err != nil {
-		logger.Panic("Error unmarshaling config into struct: ", err)
+		err = errors.New("Error unmarshaling config into struct: " + err.Error())
+		//logger.Panic("Error unmarshaling config into struct: ", err)
+		return nil, err
 	}
 
 	(&uconf).completeInitialization(filepath.Dir(config.ConfigFileUsed()))
 
 	logger.Infof("Loaded configuration: %s", config.ConfigFileUsed())
 
-	return &uconf
+	return &uconf, nil
 }
 
 // Load returns the orderer/application config combination that corresponds to
 // a given profile. Config paths may optionally be provided and will be used
 // in place of the FABRIC_CFG_PATH env variable.
-func Load(profile string, configPaths ...string) *Profile {
+func Load(profile string, configPaths ...string) (*Profile, error) {
 	config := viper.New()
 	if len(configPaths) > 0 {
 		for _, p := range configPaths {
@@ -275,26 +280,32 @@ func Load(profile string, configPaths ...string) *Profile {
 
 	err := config.ReadInConfig()
 	if err != nil {
-		logger.Panic("Error reading configuration: ", err)
+		logger.Error("Error reading configuration: ", err)
+		err = errors.New("Error reading configuration:" + err.Error())
+		return nil, err
 	}
 	logger.Debugf("Using config file: %s", config.ConfigFileUsed())
 
 	var uconf TopLevel
 	err = viperutil.EnhancedExactUnmarshal(config, &uconf)
 	if err != nil {
-		logger.Panic("Error unmarshaling config into struct: ", err)
+		logger.Error("Error unmarshaling config into struct: ", err)
+		err = errors.New("Error unmarshaling config into struct:" + err.Error())
+		return nil, err
 	}
 
 	result, ok := uconf.Profiles[profile]
 	if !ok {
-		logger.Panic("Could not find profile: ", profile)
+		logger.Error("Could not find profile: ", profile)
+		err = errors.New("Could not find profile: " +  profile)
+		return nil, err
 	}
 
 	result.completeInitialization(filepath.Dir(config.ConfigFileUsed()))
 
 	logger.Infof("Loaded configuration: %s", config.ConfigFileUsed())
 
-	return result
+	return result, nil
 }
 
 func (t *TopLevel) completeInitialization(configDir string) {

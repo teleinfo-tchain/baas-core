@@ -6,7 +6,7 @@ import (
 )
 
 type PeerK8sConfig struct {
-	Cpu          string `json:"cpu"`
+	Cpu          float64 `json:"cpu"`
 	Memory       string `json:"memory"`
 	EndpointPort string `json:"endpoint_port"`
 	WorkerLabel  string `json:"worker_label"`
@@ -43,7 +43,7 @@ type PeerOrgConfig struct {
 }
 
 type OrdererConfig struct {
-	Cpu            string
+	Cpu            float64
 	Memory         string
 	EndPointPort   string
 	OutputPort     string
@@ -62,7 +62,7 @@ type OrdererOrgConfig struct {
 }
 
 type CaK8sConfig struct {
-	Cpu            string
+	Cpu            float64
 	Memory         string
 	EndPointPort   string
 }
@@ -78,6 +78,7 @@ type FabricChain struct {
 	ChannelName        string   `json:"channelName"` //channel 名
 	TlsEnabled         string   `json:"tlsEnabled"`  //是否开启tls  true or false
 	KafkaCount         int       `json:"kafkaCount"`
+	ZkCount            string    `json:"zkCount"`
 	OrdererOrgconfig   OrdererOrgConfig
 	//Addedpeerorg       []string `json:"addedperorg"`
 	//Addedpeerconfig    map[string]*PeerOrgConfig `json:"addedpeerconfig"`
@@ -88,7 +89,7 @@ type FabricChain struct {
 }
 
 func (f FabricChain) GetHostDomain(org string) string {
-	return strings.ToLower(fmt.Sprintf("%d", f.LeagueId)+fmt.Sprintf("%d", f.ChainId)+ org)
+	return strings.ToLower("fabric-league-"+ fmt.Sprintf("%d", f.LeagueId)+ "-" + fmt.Sprintf("%d", f.ChainId)+ "-" + org)
 }
 
 type FabricChannel struct {
@@ -114,7 +115,7 @@ type DeleteNode struct {
 	ChainId     int      `json:"ChainId"`     //用户帐号
 	LeagueId    int      `json:"LeagueId"`     //用户帐号
 	Type        string   `json:"Type"`  //只能为orderer或者peer
-	Index       int      `json:"Index"`
+	Index       string      `json:"Index"`
 	Org         string   `json:"org"`
 }
 
