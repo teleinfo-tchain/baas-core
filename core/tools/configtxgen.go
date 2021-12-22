@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	"github.com/bif/telbaas/baas-core/common/log"
+	"github.com/bif/telbaas/baas-core/core/tools/fabric/common/configtxgen/encoder"
 	"github.com/hyperledger/fabric/bccsp/factory"
 	"github.com/hyperledger/fabric/common/channelconfig"
-	"github.com/bif/telbaas/baas-core/core/tools/fabric/common/configtxgen/encoder"
 	//"github.com/hyperledger/fabric/common/tools/configtxgen/encoder"
 	genesisconfig "github.com/bif/telbaas/baas-core/core/tools/fabric/common/configtxgen/localconfig"
 	//genesisconfig "github.com/hyperledger/fabric/common/tools/configtxgen/localconfig"
@@ -44,6 +44,7 @@ type Configtxgen struct {
 	outputAnchorPeersUpdate    string
 	asOrg                      string
 	printOrg                   string
+	outorg                     string
 }
 
 func NewConfigtxgen() *Configtxgen {
@@ -82,6 +83,9 @@ func (c *Configtxgen) SetAsOrg(asOrg string) {
 }
 func (c *Configtxgen) SetPrintOrg(printOrg string) {
 	c.printOrg = printOrg
+}
+func (c *Configtxgen) SetOutOrg(outorg string) {
+	c.outorg = outorg
 }
 
 func (c *Configtxgen) doOutputBlock(config *genesisconfig.Profile, channelID string, outputBlock string) error {
@@ -249,15 +253,15 @@ func (c *Configtxgen) doInspectChannelCreateTx(inspectChannelCreateTx string) er
 	return nil
 }
 
-func (c *Configtxgen) doPrintOrg(t *genesisconfig.TopLevel, printOrg string) error {
+func (c *Configtxgen) doPrintOrg(t *genesisconfig.TopLevel, printOrg, out string) error {
 	for _, org := range t.Organizations {
 		if org.Name == printOrg {
 			og, err := encoder.NewOrdererOrgGroup(org)
 			if err != nil {
 				return errors.Wrapf(err, "bad org definition for org %s", org.Name)
 			}
-
-			if err := protolator.DeepMarshalJSON(os.Stdout, &cb.DynamicConsortiumOrgGroup{ConfigGroup: og}); err != nil {
+			fp, err := os.Create(out)
+			if err := protolator.DeepMarshalJSON(fp, &cb.DynamicConsortiumOrgGroup{ConfigGroup: og}); err != nil {
 				return errors.Wrapf(err, "malformed org definition for org: %s", org.Name)
 			}
 			return nil
@@ -397,7 +401,7 @@ func (c *Configtxgen) Exec() error{
 	}
 
 	if c.printOrg != "" {
-		if err := c.doPrintOrg(topLevelConfig, c.printOrg); err != nil {
+		if err := c.doPrintOrg(topLevelConfig, c.printOrg, c.outorg); err != nil {
 			logger.Error("Error on printOrg: %s", err)
 			err = errors.New("Error on printOrg: " +  err.Error())
 			return  err
