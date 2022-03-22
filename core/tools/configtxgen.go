@@ -254,7 +254,8 @@ func (c *Configtxgen) doInspectChannelCreateTx(inspectChannelCreateTx string) er
 }
 
 func (c *Configtxgen) doPrintOrg(t *genesisconfig.TopLevel, printOrg, out string) error {
-	for _, org := range t.Organizations {
+	// 新增组织可用
+	for _, org := range t.Profiles["OrdererGenesis"].Consortiums["SampleConsortium"].Organizations {
 		if org.Name == printOrg {
 			og, err := encoder.NewOrdererOrgGroup(org)
 			if err != nil {
@@ -267,10 +268,61 @@ func (c *Configtxgen) doPrintOrg(t *genesisconfig.TopLevel, printOrg, out string
 			return nil
 		}
 	}
+
+	//for _, org := range t.Organizations {
+	//	if org.Name == printOrg {
+	//		og, err := encoder.NewOrdererOrgGroup(org)
+	//		if err != nil {
+	//			return errors.Wrapf(err, "bad org definition for org %s", org.Name)
+	//		}
+	//		fp, err := os.Create(out)
+	//		if err := protolator.DeepMarshalJSON(fp, &cb.DynamicConsortiumOrgGroup{ConfigGroup: og}); err != nil {
+	//			return errors.Wrapf(err, "malformed org definition for org: %s", org.Name)
+	//		}
+	//		return nil
+	//	}
+	//}
+
 	return errors.Errorf("organization %s not found", printOrg)
+
 }
 
-func (c *Configtxgen) Exec() error{
+func (c *Configtxgen) doPrintOrgTest(t *genesisconfig.TopLevel, printOrg, out string, isAddOrg bool) error {
+	if isAddOrg {
+		for _, org := range t.Profiles["OrdererGenesis"].Consortiums["SampleConsortium"].Organizations {
+			if org.Name == printOrg {
+				og, err := encoder.NewOrdererOrgGroup(org)
+				if err != nil {
+					return errors.Wrapf(err, "bad org definition for org %s", org.Name)
+				}
+				fp, err := os.Create(out)
+				if err := protolator.DeepMarshalJSON(fp, &cb.DynamicConsortiumOrgGroup{ConfigGroup: og}); err != nil {
+					return errors.Wrapf(err, "malformed org definition for org: %s", org.Name)
+				}
+				return nil
+			}
+		}
+	} else {
+		for _, org := range t.Organizations {
+			if org.Name == printOrg {
+				og, err := encoder.NewOrdererOrgGroup(org)
+				if err != nil {
+					return errors.Wrapf(err, "bad org definition for org %s", org.Name)
+				}
+				fp, err := os.Create(out)
+				if err := protolator.DeepMarshalJSON(fp, &cb.DynamicConsortiumOrgGroup{ConfigGroup: og}); err != nil {
+					return errors.Wrapf(err, "malformed org definition for org: %s", org.Name)
+				}
+				return nil
+			}
+		}
+	}
+
+	return errors.Errorf("organization %s not found", printOrg)
+
+}
+
+func (c *Configtxgen) Exec() error {
 
 	if c.profile == "" {
 		c.profile = genesisconfig.SampleInsecureSoloProfile
@@ -318,12 +370,12 @@ func (c *Configtxgen) Exec() error{
 	if c.outputBlock != "" || c.outputChannelCreateTx != "" || c.outputAnchorPeersUpdate != "" {
 		if c.configPath != "" {
 			profileConfig, err = genesisconfig.Load(c.profile, c.configPath)
-			if err != nil{
+			if err != nil {
 				return err
 			}
 		} else {
 			profileConfig, err = genesisconfig.Load(c.profile)
-			if err != nil{
+			if err != nil {
 				return err
 			}
 		}
@@ -331,12 +383,12 @@ func (c *Configtxgen) Exec() error{
 	var topLevelConfig *genesisconfig.TopLevel
 	if c.configPath != "" {
 		topLevelConfig, err = genesisconfig.LoadTopLevel(c.configPath)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	} else {
 		topLevelConfig, err = genesisconfig.LoadTopLevel()
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	}
@@ -348,12 +400,12 @@ func (c *Configtxgen) Exec() error{
 		}
 		if c.configPath != "" {
 			baseProfile, err = genesisconfig.Load(c.channelCreateTxBaseProfile, c.configPath)
-			if err != nil{
+			if err != nil {
 				return err
 			}
 		} else {
 			baseProfile, err = genesisconfig.Load(c.channelCreateTxBaseProfile)
-			if err != nil{
+			if err != nil {
 				return err
 			}
 		}
@@ -362,7 +414,7 @@ func (c *Configtxgen) Exec() error{
 	if c.outputBlock != "" {
 		if err := c.doOutputBlock(profileConfig, c.channelID, c.outputBlock); err != nil {
 			logger.Error("Error on outputBlock: %s", err)
-			err = errors.New("Error on outputBlock: " +  err.Error())
+			err = errors.New("Error on outputBlock: " + err.Error())
 			return err
 		}
 	}
@@ -370,7 +422,7 @@ func (c *Configtxgen) Exec() error{
 	if c.outputChannelCreateTx != "" {
 		if err := c.doOutputChannelCreateTx(profileConfig, baseProfile, c.channelID, c.outputChannelCreateTx); err != nil {
 			logger.Error("Error on outputChannelCreateTx: %s", err)
-			err = errors.New("Error on outputChannelCreateTx: " +  err.Error())
+			err = errors.New("Error on outputChannelCreateTx: " + err.Error())
 			return err
 		}
 	}
@@ -378,7 +430,7 @@ func (c *Configtxgen) Exec() error{
 	if c.inspectBlock != "" {
 		if err := c.doInspectBlock(c.inspectBlock); err != nil {
 			logger.Error("Error on inspectBlock: %s", err)
-			err = errors.New("Error on inspectBlock: " +  err.Error())
+			err = errors.New("Error on inspectBlock: " + err.Error())
 			return err
 		}
 	}
@@ -386,7 +438,7 @@ func (c *Configtxgen) Exec() error{
 	if c.inspectChannelCreateTx != "" {
 		if err := c.doInspectChannelCreateTx(c.inspectChannelCreateTx); err != nil {
 			logger.Error("Error on inspectChannelCreateTx: %s", err)
-			err = errors.New("Error on inspectChannelCreateTx: " +  err.Error())
+			err = errors.New("Error on inspectChannelCreateTx: " + err.Error())
 			return err
 		}
 	}
@@ -394,17 +446,161 @@ func (c *Configtxgen) Exec() error{
 	if c.outputAnchorPeersUpdate != "" {
 		if err := c.doOutputAnchorPeersUpdate(profileConfig, c.channelID, c.outputAnchorPeersUpdate, c.asOrg); err != nil {
 			logger.Error("Error on inspectChannelCreateTx: %s", err)
-			err = errors.New("Error on inspectChannelCreateTx: " +  err.Error())
+			err = errors.New("Error on inspectChannelCreateTx: " + err.Error())
 
 			return err
 		}
 	}
 
 	if c.printOrg != "" {
+		logger.Info("Catch printOrg&outorg:", c.printOrg, "--", c.outorg)
+		logger.Info(len(topLevelConfig.Organizations))
 		if err := c.doPrintOrg(topLevelConfig, c.printOrg, c.outorg); err != nil {
 			logger.Error("Error on printOrg: %s", err)
-			err = errors.New("Error on printOrg: " +  err.Error())
-			return  err
+			err = errors.New("Error on printOrg: " + err.Error())
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *Configtxgen) ExecTest(isAddOrg bool) error {
+
+	if c.profile == "" {
+		c.profile = genesisconfig.SampleInsecureSoloProfile
+	}
+
+	version := false
+
+	if c.channelID == "" && (c.outputBlock != "" || c.outputChannelCreateTx != "" || c.outputAnchorPeersUpdate != "") {
+		c.channelID = genesisconfig.TestChainID
+		logger.Warningf("Omitting the channel ID for configtxgen for output operations is deprecated.  Explicitly passing the channel ID will be required in the future, defaulting to '%s'.", c.channelID)
+	}
+
+	// show version
+	if version {
+		c.printVersion()
+		os.Exit(exitCode)
+	}
+
+	// don't need to panic when running via command line
+	defer func() {
+		if err := recover(); err != nil {
+			if strings.Contains(fmt.Sprint(err), "Error reading configuration: Unsupported Config Type") {
+				logger.Error("Could not find configtx.yaml. " +
+					"Please make sure that FABRIC_CFG_PATH or -configPath is set to a path " +
+					"which contains configtx.yaml")
+				os.Exit(1)
+			}
+			if strings.Contains(fmt.Sprint(err), "Could not find profile") {
+				logger.Error(fmt.Sprint(err) + ". " +
+					"Please make sure that FABRIC_CFG_PATH or -configPath is set to a path " +
+					"which contains configtx.yaml with the specified profile")
+				err = errors.New(fmt.Sprint(err) + ". " +
+					"Please make sure that FABRIC_CFG_PATH or -configPath is set to a path " +
+					"which contains configtx.yaml with the specified profile")
+				os.Exit(1)
+			}
+			logger.Panic(err)
+		}
+	}()
+
+	logger.Info("Loading configuration")
+	factory.InitFactories(nil)
+	var profileConfig *genesisconfig.Profile
+	var err error
+	if c.outputBlock != "" || c.outputChannelCreateTx != "" || c.outputAnchorPeersUpdate != "" {
+		if c.configPath != "" {
+			profileConfig, err = genesisconfig.Load(c.profile, c.configPath)
+			if err != nil {
+				return err
+			}
+		} else {
+			profileConfig, err = genesisconfig.Load(c.profile)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	var topLevelConfig *genesisconfig.TopLevel
+	if c.configPath != "" {
+		topLevelConfig, err = genesisconfig.LoadTopLevel(c.configPath)
+		if err != nil {
+			return err
+		}
+	} else {
+		topLevelConfig, err = genesisconfig.LoadTopLevel()
+		if err != nil {
+			return err
+		}
+	}
+
+	var baseProfile *genesisconfig.Profile
+	if c.channelCreateTxBaseProfile != "" {
+		if c.outputChannelCreateTx == "" {
+			logger.Warning("Specified 'channelCreateTxBaseProfile', but did not specify 'outputChannelCreateTx', 'channelCreateTxBaseProfile' will not affect output.")
+		}
+		if c.configPath != "" {
+			baseProfile, err = genesisconfig.Load(c.channelCreateTxBaseProfile, c.configPath)
+			if err != nil {
+				return err
+			}
+		} else {
+			baseProfile, err = genesisconfig.Load(c.channelCreateTxBaseProfile)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if c.outputBlock != "" {
+		if err := c.doOutputBlock(profileConfig, c.channelID, c.outputBlock); err != nil {
+			logger.Error("Error on outputBlock: %s", err)
+			err = errors.New("Error on outputBlock: " + err.Error())
+			return err
+		}
+	}
+
+	if c.outputChannelCreateTx != "" {
+		if err := c.doOutputChannelCreateTx(profileConfig, baseProfile, c.channelID, c.outputChannelCreateTx); err != nil {
+			logger.Error("Error on outputChannelCreateTx: %s", err)
+			err = errors.New("Error on outputChannelCreateTx: " + err.Error())
+			return err
+		}
+	}
+
+	if c.inspectBlock != "" {
+		if err := c.doInspectBlock(c.inspectBlock); err != nil {
+			logger.Error("Error on inspectBlock: %s", err)
+			err = errors.New("Error on inspectBlock: " + err.Error())
+			return err
+		}
+	}
+
+	if c.inspectChannelCreateTx != "" {
+		if err := c.doInspectChannelCreateTx(c.inspectChannelCreateTx); err != nil {
+			logger.Error("Error on inspectChannelCreateTx: %s", err)
+			err = errors.New("Error on inspectChannelCreateTx: " + err.Error())
+			return err
+		}
+	}
+
+	if c.outputAnchorPeersUpdate != "" {
+		if err := c.doOutputAnchorPeersUpdate(profileConfig, c.channelID, c.outputAnchorPeersUpdate, c.asOrg); err != nil {
+			logger.Error("Error on inspectChannelCreateTx: %s", err)
+			err = errors.New("Error on inspectChannelCreateTx: " + err.Error())
+
+			return err
+		}
+	}
+
+	if c.printOrg != "" {
+		logger.Info("Catch printOrg&outorg:", c.printOrg, "--", c.outorg)
+		logger.Info(len(topLevelConfig.Organizations))
+		if err := c.doPrintOrgTest(topLevelConfig, c.printOrg, c.outorg, isAddOrg); err != nil {
+			logger.Error("Error on printOrg: %s", err)
+			err = errors.New("Error on printOrg: " + err.Error())
+			return err
 		}
 	}
 	return nil

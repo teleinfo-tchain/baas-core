@@ -20,6 +20,19 @@ func (c *Clients) GetPodList(ns string, ops metav1.ListOptions) *corev1.PodList 
 	return pods
 }
 
+func (c *Clients) GetPodListByNodeName(nodeName string) *corev1.PodList {
+
+	pods, err := c.KubeClient.CoreV1().Pods("").List(
+		ctx, metav1.ListOptions{FieldSelector: "spec.nodeName=" + nodeName})
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	for _, pod := range pods.Items {
+		logger.Info("Pod：", pod.Name, pod.Status.PodIP)
+	}
+	return pods
+}
+
 func (c *Clients) CreatePod(pod *corev1.Pod, opts metav1.CreateOptions) *corev1.Pod {
 
 	newPod, err := c.KubeClient.CoreV1().Pods(pod.Namespace).Create(ctx, pod, opts)

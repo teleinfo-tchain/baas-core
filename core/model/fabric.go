@@ -7,79 +7,78 @@ import (
 
 type PeerK8sConfig struct {
 	Cpu          float64 `json:"cpu"`
-	Memory       string `json:"memory"`
-	EndpointPort string `json:"endpoint_port"`
-	WorkerLabel  string `json:"worker_label"`
-	ClPort       string  `json:"cl_port"`
-	CouchdbPort  string  `json:"couchdb_port"`
-	OutputPort   string  `json:"output_port"`
-	IP           string   `json:"ip"`
-	Nodeid       string   `json:"nodeid"`
-	Org          string   `json:"org"`
-	PodName      string   `json:"pod_name"`
-	Volume       Volumes
+	Memory       string  `json:"memory"`
+	EndpointPort string  `json:"endpointPort"`
+	WorkerLabel  string  `json:"workerLabel"`
+	ClPort       string  `json:"clPort"`
+	CouchdbPort  string  `json:"couchdbPort"`
+	OutputPort   string  `json:"outputPort"`
+	IP           string  `json:"ip"`
+	Nodeid       string  `json:"nodeId"`
+	Org          string  `json:"org"`
+	PodName      string  `json:"podName"`
+	Volume       Volumes `json:"volumes"`
 }
 
 type Volumes struct {
-	ArtifactPV         string `json:"artifact_pv"`
-	ArtifactStorage    string `json:"artifact_storage"`
-	DataPV             string  `json:"data_pv"`
-	DataStorage        string  `json:"data_storage"`
-	ArtifactServiceIP  string `json:"artifact_service_ip"`
-	ArtifactMountPath  string `json:"artifact_mount_path"`
-	DataServiceIP      string `json:"data_service_ip"`
-	DataMountPath      string `json:"data_mount_path"`
+	ArtifactPV        string `json:"artifactPv"`
+	ArtifactStorage   string `json:"artifactStorage"`
+	DataPV            string `json:"dataPv"`
+	DataStorage       string `json:"dataStorage"`
+	ArtifactServiceIP string `json:"artifactServiceIp"`
+	ArtifactMountPath string `json:"artifactMountPath"`
+	DataServiceIP     string `json:"dataServiceIp"`
+	DataMountPath     string `json:"dataMountPath"`
 }
 
-
 type PeerOrgConfig struct {
-	Peercount      int
-	Country        string
-	Province       string
-	Locality       string
-	Usercount      int
-	PeerK8sconfig  map[int]*PeerK8sConfig
-	CaK8s          CaK8sConfig
+	Peercount     int    `json:"peerCount"`
+	Country       string `json:"country"`
+	Province      string `json:"province"`
+	Locality      string `json:"locality"`
+	Usercount     int    `json:"userCount"`
+	PeerK8sconfig map[int]*PeerK8sConfig
+	CaK8s         CaK8sConfig `json:"caK8sConfig"`
 }
 
 type OrdererConfig struct {
-	Cpu            float64
-	Memory         string
-	EndPointPort   string
-	OutputPort     string
-	WorkerLabel    string
-	IP             string
-	Nodeid         string
-	PodName        string
-	Volume         Volumes
+	Cpu          float64 `json:"cpu"`
+	Memory       string  `json:"memory"`
+	EndPointPort string  `json:"endpointPort"`
+	OutputPort   string  `json:"outputPort"`
+	WorkerLabel  string  `json:"workerLabel"`
+	IP           string  `json:"ip"`
+	Nodeid       string  `json:"nodeId"`
+	PodName      string  `json:"podName"`
+	Volume       Volumes `json:"volumes"`
 }
 
 type OrdererOrgConfig struct {
-	Country        string
-	Province       string
-	Locality       string
-	OrdererK8sConfig  map[int]OrdererConfig
+	Country          string `json:"country"`
+	Province         string `json:"province"`
+	Locality         string `json:"locality"`
+	OrdererK8sConfig map[int]OrdererConfig
 }
 
 type CaK8sConfig struct {
-	Cpu            float64
-	Memory         string
-	EndPointPort   string
+	Cpu          float64 `json:"cpu"`
+	Memory       string  `json:"memory"`
+	EndPointPort string  `json:"endpointPort"`
 }
 
 type FabricChain struct {
-	ChainId     int      `json:"ChainId"`     //用户帐号
-	LeagueId    int      `json:"LeagueId"`     //用户帐号
-	Consensus   string   `json:"consensus"`   //共识
-	PeersOrgs   []string `json:"peersOrgs"`   //参与组织 除了orderer
-	OrderCount  int      `json:"orderCount"`  //orderer节点个数
+	ChainId    int      `json:"chainId"`    //用户帐号
+	LeagueId   int      `json:"leagueId"`   //用户帐号
+	Consensus  string   `json:"consensus"`  //共识
+	PeersOrgs  []string `json:"peersOrgs"`  //参与组织 除了orderer
+	OrderCount int      `json:"orderCount"` //orderer节点个数
 	//PeerCount   map[string]int      `json:"peerCount"`   //每个组织节点个数
-	PeerOrgConfig      map[string]*PeerOrgConfig
-	ChannelName        string   `json:"channelName"` //channel 名
-	TlsEnabled         string   `json:"tlsEnabled"`  //是否开启tls  true or false
-	KafkaCount         int       `json:"kafkaCount"`
-	ZkCount            string    `json:"zkCount"`
-	OrdererOrgconfig   OrdererOrgConfig
+	PeerOrgConfig    map[string]*PeerOrgConfig `json:"peerOrgConfig"`
+	ChannelName      string                    `json:"channelName"` //channel 名
+	TlsEnabled       string                    `json:"tlsEnabled"`  //是否开启tls  true or false
+	KafkaCount       int                       `json:"kafkaCount"`
+	ZkCount          string                    `json:"zkCount"`
+	OrdererOrgconfig OrdererOrgConfig          `json:"ordererOrgConfig"`
 	//Addedpeerorg       []string `json:"addedperorg"`
 	//Addedpeerconfig    map[string]*PeerOrgConfig `json:"addedpeerconfig"`
 	//Addedpeer          string   `json:"addedpeer"`//该peer节点隶属的组织名
@@ -89,11 +88,11 @@ type FabricChain struct {
 }
 
 func (f FabricChain) GetHostDomain(org string) string {
-	return strings.ToLower("fabric-league-"+ fmt.Sprintf("%d", f.LeagueId)+ "-" + fmt.Sprintf("%d", f.ChainId)+ "-" + org)
+	return strings.ToLower("fabric-league-" + fmt.Sprintf("%d", f.LeagueId) + "-" + fmt.Sprintf("%d", f.ChainId) + "-" + org)
 }
 
 type FabricChannel struct {
-	FabricChain
+	FabricChain    `json:"fabricChain"`
 	ChaincodeId    string   `json:"chaincodeId"`
 	ChaincodePath  string   `json:"chaincodePath"`
 	ChaincodeBytes []byte   `json:"chaincodeBytes"`
@@ -102,21 +101,18 @@ type FabricChannel struct {
 	Args           [][]byte `json:"args"`
 }
 
-
 type AddedPeerOrg struct {
-
 }
 
 type AddedNode struct {
-
 }
 
 type DeleteNode struct {
-	ChainId     int      `json:"ChainId"`     //用户帐号
-	LeagueId    int      `json:"LeagueId"`     //用户帐号
-	Type        string   `json:"Type"`  //只能为orderer或者peer
-	Index       string      `json:"Index"`
-	Org         string   `json:"org"`
+	ChainId  int    `json:"chainId"`  //用户帐号
+	LeagueId int    `json:"leagueId"` //用户帐号
+	Type     string `json:"type"`     //只能为orderer或者peer
+	Index    string `json:"index"`
+	Org      string `json:"org"`
 }
 
 func (f FabricChannel) GetChain() *FabricChain {

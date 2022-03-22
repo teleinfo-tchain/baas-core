@@ -61,16 +61,17 @@ type TelChain struct {
 }
 
 type TelChainInfo struct {
-	LeagueID  int    `json:"leagueId"`
-	ChainID   uint64 `json:"chainId"`
-	NodeIds   []int  `json:"nodeIds,omitempty"`
-	NodeCount int    `json:"nodeCount,omitempty"`
+	LeagueID  int                `json:"leagueId"`
+	ChainID   uint64             `json:"chainId"`
+	NodesInfo []TelChainNodeInfo `json:"nodesInfo"`
+	NodeCount int                `json:"nodeCount,omitempty"`
 }
 
 type TelChainNodeInfo struct {
-	LeagueID int    `json:"leagueId"`
-	ChainID  uint64 `json:"chainId"`
-	NodeId   int    `json:"nodeId,omitempty"`
+	LeagueID   int    `json:"leagueId"`
+	ChainID    uint64 `json:"chainId"`
+	NodeId     int    `json:"nodeId,omitempty"`
+	AccessMode int    `json:"accessMode"`
 }
 
 type TelChainResource struct {
