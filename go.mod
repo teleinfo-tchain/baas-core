@@ -3,7 +3,6 @@ module github.com/bif/telbaas/baas-core
 go 1.16
 
 require (
-	cloud.google.com/go v0.81.0 // indirect
 	github.com/BurntSushi/toml v0.4.1
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/Shopify/sarama v1.29.1
@@ -17,9 +16,7 @@ require (
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-xorm/xorm v0.7.9
-	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2
-	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hyperledger/fabric v1.4.1
 	github.com/hyperledger/fabric-amcl v0.0.0-20210603140002-2670f91851c8 // indirect
@@ -28,7 +25,7 @@ require (
 	github.com/kr/pretty v0.3.0
 	github.com/magiconair/properties v1.8.5
 	github.com/miekg/pkcs11 v1.0.3 // indirect
-	github.com/mitchellh/mapstructure v1.1.1
+	github.com/mitchellh/mapstructure v1.1.2
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/onsi/gomega v1.16.0 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
@@ -45,18 +42,12 @@ require (
 	github.com/sykesm/zap-logfmt v0.0.4 // indirect
 	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.0.0-20210915214749-c084706c2272 // indirect
-	golang.org/x/net v0.0.0-20210916014120-12bc252f5db8 // indirect
-	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602 // indirect
-	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
-	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c // indirect
 	google.golang.org/grpc v1.40.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.20.0-beta.1
-	k8s.io/apimachinery v0.20.0-beta.1
-	k8s.io/client-go v0.20.0-beta.1
-	k8s.io/klog/v2 v2.9.0 // indirect
-	k8s.io/utils v0.0.0-20210707171843-4b05e18ac7d9 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
+	k8s.io/api v0.23.5
+	k8s.io/apimachinery v0.23.5
+	k8s.io/client-go v0.23.5
+	k8s.io/metrics v0.23.5
 	xorm.io/core v0.7.3
 )

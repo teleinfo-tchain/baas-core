@@ -32,7 +32,7 @@ type ProjectDir struct {
 	BaasFabricDataDir      string
 }
 
-func (p ProjectDir)  GetProjectDir(chain *model.FabricChain, Config *viper.Viper) UserChainPath {
+func (p ProjectDir) GetProjectDir(chain *model.FabricChain, Config *viper.Viper) UserChainPath {
 	artifactPath := filepath.Join(p.BaasArtifactsDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
 	// /baas-fabricEngine/baas-nfsshared/baas-k8s-config/[leagueid]/[chainid]/
 	k8sConfig := filepath.Join(p.BaasK8sFabricConfigDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
@@ -44,8 +44,19 @@ func (p ProjectDir)  GetProjectDir(chain *model.FabricChain, Config *viper.Viper
 	return NewUserChainPath(artifactPath, k8sConfig, dataPath, templatePath)
 }
 
+func (p ProjectDir) GetProjectDirByNode(node *model.DeleteNode, Config *viper.Viper) UserChainPath {
+	artifactPath := filepath.Join(p.BaasArtifactsDir, fmt.Sprintf("%d", node.LeagueId), fmt.Sprintf("%d", node.ChainId))
+	// /baas-fabricEngine/baas-nfsshared/baas-k8s-config/[leagueid]/[chainid]/
+	k8sConfig := filepath.Join(p.BaasK8sFabricConfigDir, fmt.Sprintf("%d", node.LeagueId), fmt.Sprintf("%d", node.ChainId))
+	// /baas-fabricEngine/baas-nfsshared/baas-fabric-data/[leagueid]/[chainid]/
+	dataPath := filepath.Join(p.BaasFabricDataDir, fmt.Sprintf("%d", node.LeagueId), fmt.Sprintf("%d", node.ChainId))
+	//模板
+	// /baas-fabricEngine/baas-template
+	templatePath := filepath.Join(Config.GetString("FabricRootPath"), Config.GetString("FabricTemplate"))
+	return NewUserChainPath(artifactPath, k8sConfig, dataPath, templatePath)
+}
 
-func (p ProjectDir) BuildProjectDir(chain *model.FabricChain,Config *viper.Viper) UserChainPath {
+func (p ProjectDir) BuildProjectDir(chain *model.FabricChain, Config *viper.Viper) UserChainPath {
 	//nfs shared
 	//改了
 	// /baas-fabricEngine/baas-nfsshared/baas-artifacts/[leagueid]/[chainid]/
@@ -117,7 +128,6 @@ func (p ProjectDir) RemoveProjectDir(chain *model.FabricChain) error {
 
 }
 
-
 func NewProjetc(Config *viper.Viper) ProjectDir {
 	// 从feconfig.yaml传入 /baas-fabricEngine/baas-nfsshared
 	//todo：这里以后用minio，需要改
@@ -134,9 +144,3 @@ func NewProjetc(Config *viper.Viper) ProjectDir {
 		BaasFabricDataDir:      BaasFabricDataDir,
 	}
 }
-
-
-
-
-
-
