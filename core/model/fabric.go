@@ -32,13 +32,14 @@ type Volumes struct {
 }
 
 type PeerOrgConfig struct {
-	Peercount     int    `json:"peerCount"`
-	Country       string `json:"country"`
-	Province      string `json:"province"`
-	Locality      string `json:"locality"`
-	Usercount     int    `json:"userCount"`
-	PeerK8sconfig map[int]*PeerK8sConfig
-	CaK8s         CaK8sConfig `json:"caK8sConfig"`
+	Peercount       int    `json:"peerCount"`
+	DeactivatedNode []int  `json:"deactivatedNode"`
+	Country         string `json:"country"`
+	Province        string `json:"province"`
+	Locality        string `json:"locality"`
+	Usercount       int    `json:"userCount"`
+	PeerK8sconfig   map[int]*PeerK8sConfig
+	CaK8s           CaK8sConfig `json:"caK8sConfig"`
 }
 
 type OrdererConfig struct {
@@ -57,6 +58,7 @@ type OrdererOrgConfig struct {
 	Country          string `json:"country"`
 	Province         string `json:"province"`
 	Locality         string `json:"locality"`
+	DeactivatedNode  []int  `json:"deactivatedNode"`
 	OrdererK8sConfig map[int]OrdererConfig
 }
 

@@ -27,6 +27,7 @@ type ChainPod struct {
 	Type       string `json:"type"`
 	Cpu        string `json:"cpu"`
 	Memory     string `json:"memory"`
+	Storage    string `json:"storage"`
 }
 
 type Resources struct {

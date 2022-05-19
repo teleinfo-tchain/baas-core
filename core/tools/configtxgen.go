@@ -121,6 +121,7 @@ func (c *Configtxgen) doOutputChannelCreateTx(conf, baseProfile *genesisconfig.P
 	}
 
 	logger.Info("Writing new channel tx")
+	logger.Info("configtx: ", configtx)
 	err = ioutil.WriteFile(outputChannelCreateTx, utils.MarshalOrPanic(configtx), 0644)
 	if err != nil {
 		return fmt.Errorf("Error writing channel create tx: %s", err)
@@ -369,6 +370,7 @@ func (c *Configtxgen) Exec() error {
 	var err error
 	if c.outputBlock != "" || c.outputChannelCreateTx != "" || c.outputAnchorPeersUpdate != "" {
 		if c.configPath != "" {
+			logger.Info("Catch point01")
 			profileConfig, err = genesisconfig.Load(c.profile, c.configPath)
 			if err != nil {
 				return err
@@ -394,12 +396,15 @@ func (c *Configtxgen) Exec() error {
 	}
 
 	var baseProfile *genesisconfig.Profile
+	logger.Info("catch c.channelCreateTxBaseProfile, channelCreateTxBaseProfile: ", c.channelCreateTxBaseProfile)
 	if c.channelCreateTxBaseProfile != "" {
+		logger.Info("catch c.channelCreateTxBaseProfile")
 		if c.outputChannelCreateTx == "" {
 			logger.Warning("Specified 'channelCreateTxBaseProfile', but did not specify 'outputChannelCreateTx', 'channelCreateTxBaseProfile' will not affect output.")
 		}
 		if c.configPath != "" {
 			baseProfile, err = genesisconfig.Load(c.channelCreateTxBaseProfile, c.configPath)
+			logger.Info("catch genesisconfig.Load, baseProfile: ", baseProfile)
 			if err != nil {
 				return err
 			}
@@ -419,6 +424,7 @@ func (c *Configtxgen) Exec() error {
 		}
 	}
 
+	logger.Info("catch c.outputChannelCreateTx, baseProfile: ", baseProfile)
 	if c.outputChannelCreateTx != "" {
 		if err := c.doOutputChannelCreateTx(profileConfig, baseProfile, c.channelID, c.outputChannelCreateTx); err != nil {
 			logger.Error("Error on outputChannelCreateTx: %s", err)

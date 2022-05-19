@@ -30,6 +30,9 @@ func ResultOk(ctx *gin.Context, data interface{}) {
 func ResultOkMsg(ctx *gin.Context, data interface{}, msg string) {
 	ctx.JSON(http.StatusOK, gin.H{"code": Success, "data": data, "msg": msg})
 }
+func ResultOkStatus(ctx *gin.Context, data interface{}, status interface{}) {
+	ctx.JSON(http.StatusOK, gin.H{"code": Success, "data": data, "msg": "", "status": status})
+}
 
 /**
   @param  total  :总数
@@ -54,9 +57,13 @@ func ResultPageList(ctx *gin.Context, data interface{}, pager interface{}) {
 }
 
 func ResultFail(ctx *gin.Context, err interface{}) {
-	ctx.JSON(http.StatusOK, gin.H{"code": Fail, "data": nil, "msg": err})
+	ctx.JSON(http.StatusOK, gin.H{"code": Fail, "data": 400, "msg": err})
 }
 
 func ResultFailData(ctx *gin.Context, data interface{}, err interface{}) {
 	ctx.JSON(http.StatusOK, gin.H{"code": Fail, "data": data, "msg": err})
+}
+
+func ResultFailStatus(ctx *gin.Context, err interface{}) {
+	ctx.JSON(http.StatusOK, gin.H{"code": Fail, "data": 400, "msg": err})
 }
