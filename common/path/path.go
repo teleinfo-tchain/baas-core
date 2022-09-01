@@ -132,12 +132,13 @@ func NewProjetc(Config *viper.Viper) ProjectDir {
 	// 从feconfig.yaml传入 /baas-fabricEngine/baas-nfsshared
 	//todo：这里以后用minio，需要改
 	baasNfsSharedDir := filepath.Join(Config.GetString("FabricRootPath"), Config.GetString("FabricNfsShared"))
+	baasDataDir := filepath.Join(Config.GetString("FabricDataPath"))
 	// /baas-fabricEngine/baas-nfsshared/baas-artifacts
 	baasArtifactsDir := filepath.Join(baasNfsSharedDir, constant.BaasArtifacts)
 	// /baas-fabricEngine/baas-nfsshared/baas-k8s-config
 	BaasK8sFabricConfigDir := filepath.Join(baasNfsSharedDir, constant.BaasK8sConfig)
 	//baas-fabricEngine/baas-nfsshared/baas-fabric-data
-	BaasFabricDataDir := filepath.Join(baasNfsSharedDir, constant.BaasFabricData)
+	BaasFabricDataDir := filepath.Join(baasDataDir, constant.BaasFabricData)
 	return ProjectDir{
 		BaasArtifactsDir:       baasArtifactsDir,
 		BaasK8sFabricConfigDir: BaasK8sFabricConfigDir,
