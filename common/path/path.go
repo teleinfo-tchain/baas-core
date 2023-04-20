@@ -49,7 +49,7 @@ func (p ProjectDir) GetProjectDirByNode(node *model.DeleteNode, Config *viper.Vi
 	// /baas-fabricEngine/baas-nfsshared/baas-k8s-config/[leagueid]/[chainid]/
 	k8sConfig := filepath.Join(p.BaasK8sFabricConfigDir, fmt.Sprintf("%d", node.LeagueId), fmt.Sprintf("%d", node.ChainId))
 	// /baas-fabricEngine/baas-nfsshared/baas-fabric-data/[leagueid]/[chainid]/
-	dataPath := filepath.Join(p.BaasFabricDataDir, fmt.Sprintf("%d", node.LeagueId), fmt.Sprintf("%d", node.ChainId))
+	dataPath := filepath.Join(p.BaasFabricDataDir)
 	//模板
 	// /baas-fabricEngine/baas-template
 	templatePath := filepath.Join(Config.GetString("FabricTemplate"))
@@ -64,7 +64,7 @@ func (p ProjectDir) BuildProjectDir(chain *model.FabricChain, Config *viper.Vipe
 	// /baas-fabricEngine/baas-nfsshared/baas-k8s-config/[leagueid]/[chainid]/
 	k8sConfig := filepath.Join(p.BaasK8sFabricConfigDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
 	// /baas-fabricEngine/baas-nfsshared/baas-fabric-data/[leagueid]/[chainid]/
-	dataPath := filepath.Join(p.BaasFabricDataDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
+	dataPath := filepath.Join(p.BaasFabricDataDir)
 	//模板
 	// /baas-fabricEngine/baas-template
 	templatePath := filepath.Join(Config.GetString("FabricTemplate"))
@@ -119,7 +119,7 @@ func (p ProjectDir) RemoveProjectDir(chain *model.FabricChain) error {
 	//改了
 	artifactPath := filepath.Join(p.BaasArtifactsDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
 	k8sConfig := filepath.Join(p.BaasK8sFabricConfigDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
-	dataPath := filepath.Join(p.BaasFabricDataDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
+	dataPath := filepath.Join(p.BaasFabricDataDir)
 
 	if fileutil.RemoveDir(artifactPath) && fileutil.RemoveDir(k8sConfig) && fileutil.RemoveDir(dataPath) {
 		return nil
