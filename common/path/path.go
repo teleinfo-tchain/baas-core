@@ -40,7 +40,7 @@ func (p ProjectDir) GetProjectDir(chain *model.FabricChain, Config *viper.Viper)
 	dataPath := filepath.Join(p.BaasFabricDataDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
 	//模板
 	// /baas-fabricEngine/baas-template
-	templatePath := filepath.Join(Config.GetString("FabricRootPath"), Config.GetString("FabricTemplate"))
+	templatePath := filepath.Join(Config.GetString("FabricTemplate"))
 	return NewUserChainPath(artifactPath, k8sConfig, dataPath, templatePath)
 }
 
@@ -52,7 +52,7 @@ func (p ProjectDir) GetProjectDirByNode(node *model.DeleteNode, Config *viper.Vi
 	dataPath := filepath.Join(p.BaasFabricDataDir, fmt.Sprintf("%d", node.LeagueId), fmt.Sprintf("%d", node.ChainId))
 	//模板
 	// /baas-fabricEngine/baas-template
-	templatePath := filepath.Join(Config.GetString("FabricRootPath"), Config.GetString("FabricTemplate"))
+	templatePath := filepath.Join(Config.GetString("FabricTemplate"))
 	return NewUserChainPath(artifactPath, k8sConfig, dataPath, templatePath)
 }
 
@@ -67,7 +67,7 @@ func (p ProjectDir) BuildProjectDir(chain *model.FabricChain, Config *viper.Vipe
 	dataPath := filepath.Join(p.BaasFabricDataDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
 	//模板
 	// /baas-fabricEngine/baas-template
-	templatePath := filepath.Join(Config.GetString("FabricRootPath"), Config.GetString("FabricTemplate"))
+	templatePath := filepath.Join(Config.GetString("FabricTemplate"))
 
 	fileutil.CreatedDir(artifactPath)
 	fileutil.CreatedDir(k8sConfig)
