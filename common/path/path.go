@@ -37,7 +37,7 @@ func (p ProjectDir) GetProjectDir(chain *model.FabricChain, Config *viper.Viper)
 	// /baas-fabricEngine/baas-nfsshared/baas-k8s-config/[leagueid]/[chainid]/
 	k8sConfig := filepath.Join(p.BaasK8sFabricConfigDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
 	// /baas-fabricEngine/baas-nfsshared/baas-fabric-data/[leagueid]/[chainid]/
-	dataPath := filepath.Join(p.BaasFabricDataDir, fmt.Sprintf("%d", chain.LeagueId), fmt.Sprintf("%d", chain.ChainId))
+	dataPath := filepath.Join(p.BaasFabricDataDir)
 	//模板
 	// /baas-fabricEngine/baas-template
 	templatePath := filepath.Join(Config.GetString("FabricTemplate"))
@@ -131,12 +131,12 @@ func (p ProjectDir) RemoveProjectDir(chain *model.FabricChain) error {
 func NewProjetc(Config *viper.Viper) ProjectDir {
 	// 从feconfig.yaml传入 /baas-fabricEngine/baas-nfsshared
 	//todo：这里以后用minio，需要改
-	//baasNfsSharedDir := filepath.Join(Config.GetString("FabricRootPath"), Config.GetString("FabricNfsShared"))
+	baasNfsSharedDir := filepath.Join(Config.GetString("FabricRootPath"), Config.GetString("FabricNfsShared"))
 	baasDataDir := filepath.Join(Config.GetString("FabricDataPath"))
 	// /baas-fabricEngine/baas-nfsshared/baas-artifacts
-	baasArtifactsDir := filepath.Join(Config.GetString("FabricArtifactPath"), constant.BaasArtifacts)
+	baasArtifactsDir := filepath.Join(baasNfsSharedDir, constant.BaasArtifacts)
 	// /baas-fabricEngine/baas-nfsshared/baas-k8s-config
-	BaasK8sFabricConfigDir := filepath.Join(Config.GetString("FabricArtifactPath"), constant.BaasK8sConfig)
+	BaasK8sFabricConfigDir := filepath.Join(baasNfsSharedDir, constant.BaasK8sConfig)
 	//baas-fabricEngine/baas-nfsshared/baas-fabric-data
 	BaasFabricDataDir := filepath.Join(baasDataDir, constant.BaasFabricData)
 	return ProjectDir{
